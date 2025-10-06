@@ -1,0 +1,7 @@
+python-dotenv
+gunicorn
+Flask
+langchain
+langchain_community
+flask-smorest 
+marshmallow
