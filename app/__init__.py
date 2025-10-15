@@ -1,6 +1,8 @@
 from flask import Flask
+import os
 from .extensions import api
 from .config import Config
+from dotenv import load_dotenv
 
 def create_app(config_object: type[Config] | None = None):
     app = Flask(__name__)
@@ -8,6 +10,12 @@ def create_app(config_object: type[Config] | None = None):
 
     # Initialize extensions
     api.init_app(app)
+    load_dotenv()
+    hf_token = os.getenv('HF_TOKEN')
+    openai_key = os.getenv('OPEN_AI_API_KEY')
+    os.environ['HF_TOKEN'] = hf_token  
+    os.environ['OPENAI_API_KEY'] = openai_key  
+
 
     # Register blueprints (import here to avoid circulars)
     from text_api.text_api import bp

@@ -3,5 +3,16 @@ gunicorn
 Flask
 langchain
 langchain_community
+langchain_huggingface
 flask-smorest 
 marshmallow
+validators
+youtube-transcript-api
+pytube
+unstructured
+transformers
+torch
+langchain-openai 
+openai
+pytubefix
+moviepy
