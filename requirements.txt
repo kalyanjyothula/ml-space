@@ -3,16 +3,18 @@ gunicorn
 Flask
 langchain
 langchain_community
-langchain_huggingface
+# langchain_huggingface
 flask-smorest 
 marshmallow
 validators
-youtube-transcript-api
+# youtube-transcript-api
 pytube
 unstructured
 transformers
 torch
-langchain-openai 
+langchain_openai 
 openai
 pytubefix
 moviepy
+uuid
+redis
