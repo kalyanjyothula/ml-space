@@ -11,5 +11,14 @@
 * gunicorn --bind 0.0.0.0:8000 wsgi:app
 * (or) gunicorn --reload --bind 0.0.0.0:8000 wsgi:app
 
+### To run redis
+* brew services start redis
+
+### to test redis connection
+* redis-cli ping
+
+### To stop redis server in mac
+* brew services stop redis
+
 ### Swagger UI
 * http://127.0.0.1:8000/swagger
