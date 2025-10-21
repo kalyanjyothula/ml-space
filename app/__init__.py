@@ -24,6 +24,9 @@ def create_app(config_object: type[Config] | None = None):
     from gf_ai_chat.gf_ai_chat import bp as gf_chat_bp
     api.register_blueprint(gf_chat_bp, url_prefix="/gf")
 
+    from story_api.story_api import bp as story_bp
+    api.register_blueprint(story_bp, url_prefix="/story")
+
     @app.get("/health")
     def health():
         return {"status": "ok"}
