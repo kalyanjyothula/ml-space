@@ -22,3 +22,8 @@
 
 ### Swagger UI
 * http://127.0.0.1:8000/swagger
+
+* <img width="1450" height="785" alt="Screenshot 2025-10-21 at 1 47 00 PM" src="https://github.com/user-attachments/assets/fd3876de-65f0-4c02-be4b-6a6d40250f91" />
+<img width="1450" height="262" alt="Screenshot 2025-10-21 at 1 47 19 PM" src="https://github.com/user-attachments/assets/6f0147c8-ac8b-498d-86ed-1395aa4bc797" />
+
+
