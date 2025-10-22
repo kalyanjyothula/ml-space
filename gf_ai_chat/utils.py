@@ -1,7 +1,7 @@
 import uuid
 import json
 from flask import request
-from gf_ai_chat.config import redis_client
+from gf_ai_chat.config import redis as redis_client
 from datetime import datetime
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
