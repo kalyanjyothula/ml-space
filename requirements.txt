@@ -1,8 +1,8 @@
 python-dotenv
 gunicorn
 Flask
-langchain
-langchain_community
+langchain==0.3.27
+langchain_community==0.3.30
 # langchain_huggingface
 flask-smorest 
 marshmallow
@@ -12,7 +12,7 @@ pytube
 unstructured
 transformers
 torch
-langchain_openai 
+langchain_openai==0.3.35
 openai
 pytubefix
 moviepy
