@@ -1,0 +1,12 @@
+[Unit]
+Description=Flask app
+After=network.target
+
+[Service]
+User=webapp
+WorkingDirectory=/home/ubuntu/ml-space
+Environment="FLASK_ENV=production"   
+ExecStart=/home/ubuntu/ml-space/venv/bin/gunicorn --bind 0.0.0.0:8000 wsgi:app --timeout 120
+
+[Install]
+WantedBy=multi-user.target
