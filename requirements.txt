@@ -18,3 +18,4 @@ pytubefix
 moviepy
 uuid
 redis
+upstash_redis

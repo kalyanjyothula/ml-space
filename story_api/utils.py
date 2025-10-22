@@ -2,7 +2,7 @@ import uuid
 import json
 from flask import request
 from datetime import datetime
-from story_api.config import redis_client
+from story_api.config import redis as redis_client
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
 
