@@ -17,3 +17,6 @@ moviepy
 uuid
 redis
 upstash_redis
+PyMuPDF
+qdrant_client
+langchain_qdrant
