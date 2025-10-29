@@ -27,7 +27,10 @@ def create_app(config_object: type[Config] | None = None):
     from story_api.story_api import bp as story_bp
     api.register_blueprint(story_bp, url_prefix="/story")
 
-    @app.get("/health")
+    from rag_on_doc.rag_on_doc import bp as doc_bp
+    api.register_blueprint(doc_bp, url_prefix="/pdf")
+
+    @app.get("/")
     def health():
         return {"status": "ok"}
 

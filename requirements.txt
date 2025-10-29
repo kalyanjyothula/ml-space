@@ -2,20 +2,21 @@ python-dotenv
 gunicorn
 Flask
 langchain==0.3.27
-langchain_community==0.3.30
-# langchain_huggingface
+langchain_community
 flask-smorest 
 marshmallow
 validators
-# youtube-transcript-api
 pytube
 unstructured
 transformers
 torch
-langchain_openai==0.3.35
+langchain_openai
 openai
 pytubefix
 moviepy
 uuid
 redis
 upstash_redis
+PyMuPDF
+qdrant_client
+langchain_qdrant
