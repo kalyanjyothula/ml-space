@@ -132,5 +132,4 @@ def get_answer_from_query(query, history, collection_name="pdf_docs", top_k=3):
 
     answer = qa_chain({"question": query, "chat_history": history})
     return answer["answer"]
-    return answer
 
