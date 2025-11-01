@@ -30,6 +30,9 @@ def create_app(config_object: type[Config] | None = None):
     from rag_on_doc.rag_on_doc import bp as doc_bp
     api.register_blueprint(doc_bp, url_prefix="/pdf")
 
+    from excel_companion.excel_companion import bp as excel_bp
+    api.register_blueprint(excel_bp, url_prefix="/excel")
+
     @app.get("/")
     def health():
         return {"status": "ok"}
