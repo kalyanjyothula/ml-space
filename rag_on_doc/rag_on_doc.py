@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 from datetime import datetime
 from flask_smorest import Blueprint
 from flask import jsonify, request, make_response
@@ -63,7 +64,7 @@ def upload_pdf():
         save_doc_chat_id(session_id, doc_id, title=file.filename)
 
         os.remove(file_path)
-        resp = make_response(jsonify({"message": f"Stored {total} chunks for {file.filename}"}), 200)
+        resp = make_response(jsonify({"message": f"Stored {total} chunks for {file.filename}", "doc_id": doc_id}), 200)
         resp.set_cookie("session_id", session_id, max_age=60 * 60 * 24 * 7)
         return resp
     
@@ -75,7 +76,7 @@ def upload_pdf():
 
 @bp.get('/chats-list')
 def get_chats_list():
-    session_id = request.cookies.get("session_id")
+    session_id = get_session_id()
     if not session_id:
         return jsonify({"error": "Missing session_id"}), 400
     
@@ -84,25 +85,28 @@ def get_chats_list():
     for key in chat_keys:
         chats.append(json.loads(key))
 
-    return jsonify({"chats": chats}), 200
+    resp = make_response(jsonify({"chats": chats}), 200)
+    resp.set_cookie("session_id", session_id, max_age=60 * 60 * 24 * 7)
+    return resp
 
 
 @bp.get('/chat')
 def get_chat_history():
     session_id = request.cookies.get("session_id")
-    chat_id = request.args.get("chat_id")
+    chat_id = request.get_json().get("chat_id")
     if not session_id or not chat_id:
         return jsonify({"error": "Missing session_id or chat_id"}), 400
 
     history = load_user_chat_messages(session_id, chat_id)
     messages = []
-    for msg in history.messages:
+    for msg in history.chat_memory.messages:
         messages.append({
             "type": "human" if isinstance(msg, HumanMessage) else "ai" if isinstance(msg, AIMessage) else "system",
             "content": msg.content,
             "timestamp": msg.additional_kwargs.get("timestamp")
         })
-    return jsonify({"messages": messages}), 200
+    resp = make_response(jsonify({"message": messages}), 200)
+    return resp
 
 @bp.post('/ask')
 def ask_query():
@@ -110,6 +114,10 @@ def ask_query():
     query = data.get("query")
     chat_id = data.get("chat_id")
     session_id = request.cookies.get("session_id")
+    if not session_id:
+        return jsonify({"error": "Missing session_id"}), 400
+    if not chat_id:
+        chat_id = str(uuid.uuid4())
 
     collection_name = f"{session_id}__{chat_id}"
     # print("Collection Name:", collection_name, "query", query, chat_id, session_id)
@@ -119,14 +127,12 @@ def ask_query():
     time_stamp = datetime.utcnow().isoformat()
     history = load_user_chat_messages(session_id, chat_id)
     human_msg = HumanMessage(content=query, additional_kwargs={"timestamp": time_stamp})
-    history.add_message(human_msg)
-    
-    messages = [SystemMessage(content=SYSTEM_PROMPT)] + history.messages
-    # print("Messages for query:", messages)
-    answer = get_answer_from_query(query, messages, collection_name)
+    history.chat_memory.messages.append(human_msg)
+    history.chat_memory.messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
+    answer = get_answer_from_query(query, history, collection_name)
 
-    ai_msg = AIMessage(content=answer, additional_kwargs={"timestamp": time_stamp})
-    history.add_message(ai_msg)
+    # ai_msg = AIMessage(content=answer, additional_kwargs={"timestamp": time_stamp})
+    # history.chat_memory.messages.append(ai_msg)
     save_user_chat_messages(session_id, chat_id, history, time_stamp, real_time=True)
 
-    return jsonify({"answer": answer}), 200
+    return jsonify({"answer": answer, "chat_id": chat_id}), 200

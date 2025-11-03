@@ -3,6 +3,8 @@ import os
 from .extensions import api
 from .config import Config
 from dotenv import load_dotenv
+import logging
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 def create_app(config_object: type[Config] | None = None):
     app = Flask(__name__)
@@ -29,6 +31,9 @@ def create_app(config_object: type[Config] | None = None):
 
     from rag_on_doc.rag_on_doc import bp as doc_bp
     api.register_blueprint(doc_bp, url_prefix="/pdf")
+
+    from excel_companion.excel_companion import bp as excel_bp
+    api.register_blueprint(excel_bp, url_prefix="/excel")
 
     @app.get("/")
     def health():

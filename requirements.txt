@@ -20,3 +20,4 @@ upstash_redis
 PyMuPDF
 qdrant_client
 langchain_qdrant
+langchain_redis
