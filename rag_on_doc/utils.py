@@ -61,7 +61,7 @@ def load_user_chat_messages(session_id, chat_id):
             elif msg["type"] == "system":
                 messages.append(SystemMessage(content=msg["content"], additional_kwargs={"timestamp": msg["timestamp"]}))
     history = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    history.chat_memory.messages = messages
+    history.chat_memory.messages.extend(messages)
     return history
 
 def save_user_chat_messages(session_id, chat_id, history, timestamp, real_time=False):
@@ -127,14 +127,15 @@ def get_answer_from_query(query, history, collection_name="pdf_docs", top_k=3):
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": top_k})
 
-    llm = ChatOpenAI(model=model, temperature=0.3)
+    llm = ChatOpenAI(model=model, temperature=0.5)
 
     qa_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=retriever,
+        memory=history,
         return_source_documents=False
     )
 
-    answer = qa_chain({"question": query, "chat_history": history})
+    answer = qa_chain.invoke({"question": query})
     return answer["answer"]
 

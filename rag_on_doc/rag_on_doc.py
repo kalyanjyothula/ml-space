@@ -64,7 +64,7 @@ def upload_pdf():
         save_doc_chat_id(session_id, doc_id, title=file.filename)
 
         os.remove(file_path)
-        resp = make_response(jsonify({"message": f"Stored {total} chunks for {file.filename}"}), 200)
+        resp = make_response(jsonify({"message": f"Stored {total} chunks for {file.filename}", "doc_id": doc_id}), 200)
         resp.set_cookie("session_id", session_id, max_age=60 * 60 * 24 * 7)
         return resp
     
@@ -129,11 +129,10 @@ def ask_query():
     human_msg = HumanMessage(content=query, additional_kwargs={"timestamp": time_stamp})
     history.chat_memory.messages.append(human_msg)
     history.chat_memory.messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
-    messages = history.chat_memory.messages
-    answer = get_answer_from_query(query, messages, collection_name)
+    answer = get_answer_from_query(query, history, collection_name)
 
-    ai_msg = AIMessage(content=answer, additional_kwargs={"timestamp": time_stamp})
-    history.chat_memory.messages.append(ai_msg)
+    # ai_msg = AIMessage(content=answer, additional_kwargs={"timestamp": time_stamp})
+    # history.chat_memory.messages.append(ai_msg)
     save_user_chat_messages(session_id, chat_id, history, time_stamp, real_time=True)
 
     return jsonify({"answer": answer, "chat_id": chat_id}), 200

@@ -3,6 +3,8 @@ import os
 from .extensions import api
 from .config import Config
 from dotenv import load_dotenv
+import logging
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 def create_app(config_object: type[Config] | None = None):
     app = Flask(__name__)

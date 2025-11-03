@@ -87,8 +87,6 @@ def ask_query():
     history.chat_memory.messages.append(human_msg)
     history.chat_memory.messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
     answer = get_answer_from_query(query, history, collection_name)
-    # ai_msg = AIMessage(content=answer, additional_kwargs={"timestamp": time_stamp})
-    # history.chat_memory.messages.append(ai_msg)
     save_user_chat_messages(session_id, chat_id, history, time_stamp, real_time=True)
 
     return jsonify({"answer": answer, "chat_id": chat_id}), 200

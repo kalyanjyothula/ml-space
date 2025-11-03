@@ -5,7 +5,6 @@ from flask import request
 from datetime import datetime
 from excel_companion.config import redis as redis_client
 from langchain.schema import SystemMessage, HumanMessage, AIMessage
-from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain.chains import ConversationalRetrievalChain
 from langchain_qdrant import QdrantVectorStore
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -30,7 +29,7 @@ def get_chat_id():
 def save_chat_id(session_id, chat_id, title="Untitled Document"):
     key = f"excel_user_chat_list:{session_id}"
     message = {"chat_id": chat_id, "title": title, "timestamp": datetime.utcnow().isoformat()}
-    redis_client.rpush(key, message)
+    redis_client.rpush(key, json.dumps(message))
     redis_client.expire(key, 60 * 60 * 24 * 7)
 
 def load_user_chat_list(session_id):
@@ -53,7 +52,7 @@ def load_user_chat_messages(session_id, chat_id):
             elif msg["type"] == "system":
                 messages.append(SystemMessage(content=msg["content"], additional_kwargs={"timestamp": msg["timestamp"]}))
     history = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-    history.chat_memory.messages = messages
+    history.chat_memory.messages.extend(messages)
     return history
 
 def save_user_chat_messages(session_id, chat_id, history, timestamp, real_time=False):
@@ -72,14 +71,6 @@ def save_user_chat_messages(session_id, chat_id, history, timestamp, real_time=F
     redis_client.rpush(key, *json_messages)
     redis_client.expire(key, 60 * 60 * 24 * 7)
 
-def get_or_create_memory(session_id):
-    """Fetch or create a new conversation memory for the given session."""
-    if session_id not in session_memories:
-        session_memories[session_id] = ConversationBufferMemory(
-            memory_key="chat_history",
-            return_messages=True
-        )
-    return session_memories[session_id]
 
 
 def get_answer_from_query(query, history, collection_name="pdf_docs", top_k=3):
@@ -98,9 +89,7 @@ def get_answer_from_query(query, history, collection_name="pdf_docs", top_k=3):
 
     retriever = vectorstore.as_retriever(search_kwargs={"k": top_k})
 
-    llm = ChatOpenAI(model=model, temperature=0.3)
-    session_id = get_session_id()
-    # memory = get_or_create_memory(session_id)
+    llm = ChatOpenAI(model=model, temperature=0.5)
 
     qa_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,

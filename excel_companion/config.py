@@ -1,5 +1,4 @@
 import os
-# import redis
 from upstash_redis import Redis
 
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
