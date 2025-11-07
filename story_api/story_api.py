@@ -18,7 +18,8 @@ SYSTEM_PROMPT = (
     Your goal is to help the user create a short film story that connects emotionally with the audience and follows cinematic storytelling standards.
     When the user provides a brief idea or theme, you will expand it into a detailed story outline with well-defined characters, settings, conflicts, and resolutions. 
     You will suggest engaging plot points, character motivations, and emotional beats that resonate with viewers. 
-    Your tone is professional yet creative, offering insightful suggestions while encouraging the user’s own creativity. """
+    Your tone is professional yet creative, offering insightful suggestions while encouraging the user’s own creativity. 
+    Please Note, if they ask for general conversation , respond accordingly"""
 )
 
 MODEL_NAME = os.getenv("MODEL_NAME")
@@ -35,10 +36,11 @@ def index():
 def create():
     try:
         session_id = get_session_id()
-        chat_id = get_chat_id()
+        chat_id = request.json.get("chat_id", "").strip()
+        chat_id = chat_id if chat_id else get_chat_id()
         user_message = request.json.get("message", "").strip()
         if not user_message:
-            return jsonify({"error": "Message is required"}), 400
+            return jsonify({"status": "fail", "error": "Message is required"}), 400
         time_stamp = datetime.utcnow().isoformat()
         
         history = load_chat_data(session_id, chat_id)
@@ -56,11 +58,13 @@ def create():
 
 
         resp = make_response(jsonify({
+            "status": "success",
             "response": llm_reply,
+            "chat_id": chat_id,
             "timestamp": time_stamp
         }))
         resp.set_cookie("session_id", session_id, max_age=60 * 60 * 24 * 7)
-        resp.set_cookie("chat_id", chat_id, max_age=60 * 60 * 24 * 7)
+        # resp.set_cookie("chat_id", chat_id, max_age=60 * 60 * 24 * 7)
         return resp
 
     except Exception as e:
@@ -79,8 +83,26 @@ def get_stories():
             messages = [{"type": "human" if isinstance(msg, HumanMessage) else "ai", "content": msg.content, "timestamp": msg.additional_kwargs.get("timestamp")} for msg in history.messages]
             result[chat_key] = messages
         return jsonify({
-            "status": "ok", "chats": result
+            "status": "success", "chats": result
         }), 200
     except Exception as e:
         print("Error:", e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"status": "fail", "error": str(e)}), 500
+    
+@bp.post('/get-story')
+def get_story():
+    try:
+        session_id = get_session_id()
+        chat_id = request.json.get("chat_id", "").strip()
+        if not chat_id:
+            return jsonify({"status": "fail", "error": "chat details is required"}), 400
+        
+        history = load_chat_data(session_id, chat_id)
+        messages = [{"type": "human" if isinstance(msg, HumanMessage) else "ai", "content": msg.content, "timestamp": msg.additional_kwargs.get("timestamp")} for msg in history.messages]
+
+        return jsonify({
+            "status": "success", "chats": messages
+        }), 200
+    except Exception as e:
+        print("exception")
+        return jsonify({"status": "fail", "error": str(e)}), 500
