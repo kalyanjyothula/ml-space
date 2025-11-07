@@ -37,7 +37,7 @@ def ask():
         session_id = get_session_id()
         user_message = request.json.get("message", "").strip()
         if not user_message:
-            return jsonify({"error": "Message is required"}), 400
+            return jsonify({"status": "fail" , "error": "Message is required"}), 400
         time_stamp = datetime.utcnow().isoformat()
         
         history = load_session_history(session_id)
@@ -55,6 +55,7 @@ def ask():
 
 
         resp = make_response(jsonify({
+            "status": "success",
             "response": llm_reply,
             "timestamp": time_stamp
         }))
@@ -63,7 +64,7 @@ def ask():
 
     except Exception as e:
         print("Error:", e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"status": "fail", "error": str(e)}), 500
 
 # add redis connection  test api
 
@@ -82,9 +83,10 @@ def get_recent_chats():
         messages = [{"type": "human" if isinstance(msg, HumanMessage) else "ai", "content": msg.content, "timestamp": msg.additional_kwargs.get("timestamp")} for msg in history.messages]
         return jsonify({
             "session_id": session_id,
-            "messages": messages
+            "messages": messages,
+            "status": "success"
         }), 200       
         
     except Exception as e:
         print("Error:", e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"status": "fail", "error": str(e)}), 500
