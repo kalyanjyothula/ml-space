@@ -78,7 +78,7 @@ def get_stories():
         chats = load_recent_chat_data(session_id)
         result = {}
         for msg in chats:
-            chat_key = msg["chat_key"]
+            chat_key = msg["chat_key"].split(f"{session_id}:")[-1]
             history = msg['history']
             messages = [{"type": "human" if isinstance(msg, HumanMessage) else "ai", "content": msg.content, "timestamp": msg.additional_kwargs.get("timestamp")} for msg in history.messages]
             result[chat_key] = messages
