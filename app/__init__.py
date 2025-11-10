@@ -9,7 +9,7 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 def create_app(config_object: type[Config] | None = None):
     app = Flask(__name__)
-    CORS(app, resources={r"/*": {"origins": ["http://localhost:3000",]}})
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})
 
 
     app.config.from_object(config_object or Config)
