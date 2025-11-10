@@ -84,7 +84,7 @@ def ask_query():
             return jsonify({"error": "Missing session_id"}), 400
         if not chat_id:
             chat_id = str(uuid.uuid4())
-            save_chat_id(session_id, chat_id, title=query.strip()[:20])
+            save_chat_id(session_id, chat_id, title=query.strip()[:40])
 
         collection_name = COLLECTION_NAME
         if not query or not collection_name:
