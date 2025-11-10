@@ -32,61 +32,73 @@ def index():
 
 @bp.get('/chats-list')
 def get_chats_list():
-    session_id = get_session_id()
-    if not session_id:
-        return jsonify({"error": "Missing session_id"}), 400
-    
-    chat_keys = load_user_chat_list(session_id)
-    chats = []
-    for key in chat_keys:
-        chats.append(json.loads(key))
+    try:
+        session_id = get_session_id()
+        if not session_id:
+            return jsonify({"error": "Missing session_id"}), 400
+        
+        chat_keys = load_user_chat_list(session_id)
+        chats = []
+        for key in chat_keys:
+            chats.append(json.loads(key))
 
-    resp = make_response(jsonify({"chats": chats}), 200)
-    resp.set_cookie("session_id", session_id, max_age=60 * 60 * 24 * 7)
+        resp = make_response(jsonify({"chats": chats, "status": "success"}), 200)
+        resp.set_cookie("session_id", session_id, max_age=60 * 60 * 24 * 7)
 
-    return resp
+        return resp
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"status": "fail", "error": str(e)}), 500
 
 
 @bp.get('/chat')
 def get_chat_history():
-    session_id = request.cookies.get("session_id")
-    chat_id = request.get_json().get("chat_id")
-    if not session_id or not chat_id:
-        return jsonify({"error": "Missing session_id or chat_id"}), 400
+    try:
+        session_id = request.cookies.get("session_id")
+        chat_id = request.get_json().get("chat_id")
+        if not session_id or not chat_id:
+            return jsonify({"error": "Missing session_id or chat_id"}), 400
 
-    history = load_user_chat_messages(session_id, chat_id)
-    messages = []
-    for msg in history.chat_memory.messages:
-        messages.append({
-            "type": "human" if isinstance(msg, HumanMessage) else "ai" if isinstance(msg, AIMessage) else "system",
-            "content": msg.content,
-            "timestamp": msg.additional_kwargs.get("timestamp")
-        })
-    resp = make_response(jsonify({"message": messages}), 200)
-    return resp
+        history = load_user_chat_messages(session_id, chat_id)
+        messages = []
+        for msg in history.chat_memory.messages:
+            messages.append({
+                "type": "human" if isinstance(msg, HumanMessage) else "ai" if isinstance(msg, AIMessage) else "system",
+                "content": msg.content,
+                "timestamp": msg.additional_kwargs.get("timestamp")
+            })
+        resp = make_response(jsonify({"message": messages, "status": "success"}), 200)
+        return resp
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"status": "fail", "error": str(e)}), 500
 
 @bp.post('/query')
 def ask_query():
-    data = request.get_json()
-    query = data.get("query")
-    chat_id = data.get("chat_id")
-    session_id = request.cookies.get("session_id")
-    if not session_id:
-        return jsonify({"error": "Missing session_id"}), 400
-    if not chat_id:
-        chat_id = str(uuid.uuid4())
-        save_chat_id(session_id, chat_id, title=query.strip()[:20])
+    try:
+        data = request.get_json()
+        query = data.get("query")
+        chat_id = data.get("chat_id")
+        session_id = request.cookies.get("session_id")
+        if not session_id:
+            return jsonify({"error": "Missing session_id"}), 400
+        if not chat_id:
+            chat_id = str(uuid.uuid4())
+            save_chat_id(session_id, chat_id, title=query.strip()[:20])
 
-    collection_name = COLLECTION_NAME
-    if not query or not collection_name:
-        return jsonify({"error": "Missing query or collection_name"}), 400
-    
-    time_stamp = datetime.utcnow().isoformat()
-    history = load_user_chat_messages(session_id, chat_id)
-    human_msg = HumanMessage(content=query, additional_kwargs={"timestamp": time_stamp})
-    history.chat_memory.messages.append(human_msg)
-    history.chat_memory.messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
-    answer = get_answer_from_query(query, history, collection_name)
-    save_user_chat_messages(session_id, chat_id, history, time_stamp, real_time=True)
+        collection_name = COLLECTION_NAME
+        if not query or not collection_name:
+            return jsonify({"error": "Missing query or collection_name"}), 400
+        
+        time_stamp = datetime.utcnow().isoformat()
+        history = load_user_chat_messages(session_id, chat_id)
+        human_msg = HumanMessage(content=query, additional_kwargs={"timestamp": time_stamp})
+        history.chat_memory.messages.append(human_msg)
+        history.chat_memory.messages.insert(0, SystemMessage(content=SYSTEM_PROMPT))
+        answer = get_answer_from_query(query, history, collection_name)
+        save_user_chat_messages(session_id, chat_id, history, time_stamp, real_time=True)
 
-    return jsonify({"answer": answer, "chat_id": chat_id}), 200
+        return jsonify({"answer": answer, "chat_id": chat_id , "status": "success"}), 200
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"status": "fail", "error": str(e)}), 500
