@@ -51,7 +51,7 @@ def get_chats_list():
         return jsonify({"status": "fail", "error": str(e)}), 500
 
 
-@bp.get('/chat')
+@bp.post('/chat')
 def get_chat_history():
     try:
         session_id = request.cookies.get("session_id")
